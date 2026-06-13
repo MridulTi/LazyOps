@@ -1,0 +1,16 @@
+id: delete-peering-route
+
+name: Delete Peering Route
+
+description: Clean Peering Route tables, and saving backup in a file (DRY_RUN:false)
+
+runtime: bash
+
+entrypoint: script.sh
+
+inputs:
+  - name: region
+    required: true
+
+  - name: peering-file
+    required: true
