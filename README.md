@@ -118,9 +118,10 @@ LazyOps does not replace your automation. It makes it easier to organize, discov
 ## Roadmap
 
 * [x] Workflow specification
-* [ ] Local workflow execution
-* [ ] Interactive CLI
-* [ ] Search and validation
+* [x] Local workflow execution
+* [x] Interactive CLI
+* [x] Search
+* [ ] validation
 * [ ] Workflow packs
 * [ ] Plugin runtimes
 * [ ] Optional web dashboard
