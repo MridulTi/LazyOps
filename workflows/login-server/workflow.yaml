@@ -1,0 +1,11 @@
+id: login-server
+
+name: Login Server
+
+description: Login Server
+
+runtime: bash
+
+entrypoint: script.sh
+
+version: 1.0.0

@@ -1,0 +1,11 @@
+id: changepassword
+
+name: Changepassword
+
+description: Changepassword
+
+runtime: bash
+
+entrypoint: script.sh
+
+version: 1.0.0

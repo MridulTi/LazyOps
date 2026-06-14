@@ -1,0 +1,11 @@
+id: list-qualys-branches-from-userdata
+
+name: List Qualys Branches From Userdata
+
+description: List Qualys Branches From Userdata
+
+runtime: python
+
+entrypoint: script.py
+
+version: 1.0.0

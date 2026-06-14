@@ -1,0 +1,11 @@
+id: removetags
+
+name: Removetags
+
+description: Removetags
+
+runtime: bash
+
+entrypoint: script.sh
+
+version: 1.0.0

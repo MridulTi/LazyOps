@@ -1,16 +1,11 @@
-id: restart-pods
+id: create-iam
 
-name: Restart Pods
+name: Create Iam
 
-description: Restart unhealthy Kubernetes deployments
+description: Create Iam
 
 runtime: bash
 
 entrypoint: script.sh
 
-inputs:
-  - name: namespace
-    required: true
-
-  - name: deployment
-    required: true
+version: 1.0.0

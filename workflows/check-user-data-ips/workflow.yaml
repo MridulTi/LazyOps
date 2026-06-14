@@ -1,0 +1,15 @@
+id: check-user-data-ips
+
+name: Check User Data IPs
+
+description: Check user data on instances from an IP list file. Required env: AWS_REGION or REGION.
+
+runtime: bash
+
+entrypoint: script.sh
+
+version: 1.0.0
+
+inputs:
+  - name: ips-file
+    required: true

@@ -2,15 +2,14 @@ id: delete-peering-route
 
 name: Delete Peering Route
 
-description: Clean Peering Route tables, and saving backup in a file (DRY_RUN:false)
+description: Clean peering route tables with JSON backup. DRY_RUN defaults to true. Required env: AWS_REGION or REGION, DRY_RUN (default: true).
 
-runtime: bash
+runtime: python
 
-entrypoint: script.sh
+entrypoint: script.py
+
+version: 1.0.0
 
 inputs:
-  - name: region
-    required: true
-
   - name: peering-file
     required: true

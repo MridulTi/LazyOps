@@ -1,0 +1,11 @@
+id: siem-installation
+
+name: Siem Installation
+
+description: Siem Installation
+
+runtime: python
+
+entrypoint: script.py
+
+version: 1.0.0

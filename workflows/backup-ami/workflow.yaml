@@ -2,12 +2,14 @@ id: backup-ami
 
 name: Backup AMI
 
-description: Backup Ami from IPs in ips.txt
+description: Backup AMI from IPs in an input file.
 
 runtime: bash
 
 entrypoint: script.sh
 
+version: 1.0.0
+
 inputs:
-  - name: ips
+  - name: ips-file
     required: true

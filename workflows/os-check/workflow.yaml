@@ -1,0 +1,11 @@
+id: os-check
+
+name: Os Check
+
+description: Os Check
+
+runtime: python
+
+entrypoint: script.py
+
+version: 1.0.0

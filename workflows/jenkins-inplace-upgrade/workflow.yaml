@@ -1,0 +1,11 @@
+id: jenkins-inplace-upgrade
+
+name: Jenkins Inplace Upgrade
+
+description: Jenkins Inplace Upgrade
+
+runtime: bash
+
+entrypoint: script.sh
+
+version: 1.0.0

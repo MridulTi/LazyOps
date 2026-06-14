@@ -1,0 +1,17 @@
+id: ssh-ssm
+
+name: Ssh Ssm
+
+description: Ssh Ssm
+
+runtime: bash
+
+entrypoint: script.sh
+
+version: 1.0.0
+
+inputs:
+  - name: ips-file
+    required: true
+  - name: config-file
+    required: true

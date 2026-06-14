@@ -1,0 +1,11 @@
+id: setup-cron
+
+name: Setup Cron
+
+description: Setup cron jobs on remote servers. Required env: AWS_REGION or REGION, SSH_USER (optional).
+
+runtime: bash
+
+entrypoint: script.sh
+
+version: 1.0.0

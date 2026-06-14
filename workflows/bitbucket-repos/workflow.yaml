@@ -1,0 +1,11 @@
+id: bitbucket-repos
+
+name: Bitbucket Repos
+
+description: List Bitbucket repositories and access permissions. Required env: BITBUCKET_EMAIL, BITBUCKET_TOKEN.
+
+runtime: python
+
+entrypoint: script.py
+
+version: 1.0.0

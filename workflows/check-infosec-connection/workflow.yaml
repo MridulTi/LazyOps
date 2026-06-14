@@ -1,0 +1,17 @@
+id: check-infosec-connection
+
+name: Check Infosec Connection
+
+description: Check Infosec Connection
+
+runtime: bash
+
+entrypoint: script.sh
+
+version: 1.0.0
+
+inputs:
+  - name: ssh-key
+    required: true
+  - name: username
+    required: true

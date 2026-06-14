@@ -1,0 +1,17 @@
+id: remove-usepam-infosec
+
+name: Remove Usepam Infosec
+
+description: Remove Usepam Infosec
+
+runtime: bash
+
+entrypoint: script.sh
+
+version: 1.0.0
+
+inputs:
+  - name: ssh-key
+    required: true
+  - name: ip1
+    required: true

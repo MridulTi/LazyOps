@@ -1,0 +1,19 @@
+id: change-user-shell
+
+name: Change User Shell
+
+description: Change User Shell
+
+runtime: bash
+
+entrypoint: script.sh
+
+version: 1.0.0
+
+inputs:
+  - name: target-user
+    required: true
+  - name: ssh-key
+    required: true
+  - name: ip1
+    required: true

@@ -2,15 +2,16 @@ id: restart-pods
 
 name: Restart Pods
 
-description: Restart unhealthy Kubernetes deployments
+description: Restart unhealthy Kubernetes deployments.
 
 runtime: bash
 
 entrypoint: script.sh
 
+version: 1.0.0
+
 inputs:
   - name: namespace
     required: true
-
   - name: deployment
     required: true

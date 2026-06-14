@@ -1,0 +1,21 @@
+id: change-password-expiry
+
+name: Change Password Expiry
+
+description: Change Password Expiry
+
+runtime: bash
+
+entrypoint: script.sh
+
+version: 1.0.0
+
+inputs:
+  - name: ssh-key
+    required: true
+  - name: user
+    required: true
+  - name: username
+    required: true
+  - name: ip1
+    required: true
