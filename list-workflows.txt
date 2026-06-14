@@ -1,0 +1,6 @@
+/mnt/data/Mridul/Codes/LazyOps/workflows/backup-ami
+/mnt/data/Mridul/Codes/LazyOps/workflows/delete-peering-route
+/mnt/data/Mridul/Codes/LazyOps/workflows/restart-pods
+/mnt/data/Mridul/Codes/LazyOps/workflows/backup-ami
+/mnt/data/Mridul/Codes/LazyOps/workflows/delete-peering-route
+/mnt/data/Mridul/Codes/LazyOps/workflows/restart-pods

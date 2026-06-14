@@ -1,0 +1,10 @@
+annotated-doc==0.0.4
+-e git+https://github.com/MridulTi/LazyOps.git@9b69f56048dd6936a9d9433e6d703578c00cc369#egg=lazyops
+markdown-it-py==4.2.0
+mdurl==0.1.2
+Pygments==2.20.0
+PyYAML==6.0.3
+rich==15.0.0
+shellingham==1.5.4
+typer==0.26.7
+typing==3.7.4.3
