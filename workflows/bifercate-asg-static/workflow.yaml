@@ -1,8 +1,8 @@
 id: bifercate-asg-static
 
-name: Bifurcate ASG Static
+name: "Bifurcate ASG Static"
 
-description: Split ASG/static instance lists into output CSV.
+description: "Split ASG/static instance lists into output CSV."
 
 runtime: bash
 

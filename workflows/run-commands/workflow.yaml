@@ -1,8 +1,8 @@
 id: run-commands
 
-name: Run Commands
+name: "Run Commands"
 
-description: Run commands on servers listed in a config file.
+description: "Run commands on servers listed in a config file."
 
 runtime: bash
 

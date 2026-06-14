@@ -1,8 +1,8 @@
 id: force-cortex-id-change
 
-name: Force Cortex Id Change
+name: "Force Cortex Id Change"
 
-description: Force Cortex Id Change
+description: "Force Cortex Id Change"
 
 runtime: bash
 

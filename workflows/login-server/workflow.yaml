@@ -1,8 +1,8 @@
 id: login-server
 
-name: Login Server
+name: "Login Server"
 
-description: Login Server
+description: "Login Server"
 
 runtime: bash
 

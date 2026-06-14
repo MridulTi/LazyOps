@@ -1,8 +1,8 @@
 id: remote-script
 
-name: Remote Script
+name: "Remote Script"
 
-description: Remote Script
+description: "Remote Script"
 
 runtime: bash
 

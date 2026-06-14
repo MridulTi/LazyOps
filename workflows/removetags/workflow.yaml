@@ -1,8 +1,8 @@
 id: removetags
 
-name: Removetags
+name: "Removetags"
 
-description: Removetags
+description: "Removetags"
 
 runtime: bash
 

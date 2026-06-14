@@ -1,8 +1,8 @@
 id: setup-redis-exporter
 
-name: Setup Redis Exporter
+name: "Setup Redis Exporter"
 
-description: Install redis exporter on servers from a list file.
+description: "Install redis exporter on servers from a list file."
 
 runtime: bash
 

@@ -1,8 +1,8 @@
 id: nacl-entry-add
 
-name: NACL Entry Add
+name: "NACL Entry Add"
 
-description: Add NACL allow rules for a CIDR across network ACLs. Required env: AWS_REGION or REGION.
+description: "Add NACL allow rules for a CIDR across network ACLs. Required env: AWS_REGION or REGION."
 
 runtime: bash
 

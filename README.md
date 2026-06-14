@@ -51,10 +51,42 @@ workflows/
 Run it:
 
 ```bash
-lazyops run restart-pods
+./lazyops run restart-pods
 ```
 
 LazyOps reads the workflow definition, collects required inputs, and executes the script using the declared runtime.
+
+## Installation
+
+LazyOps always runs from a project-local virtual environment (`.venv`). Do not install with system `pip`.
+
+```bash
+git clone <repo-url> LazyOps
+cd LazyOps
+bash setup.sh
+source ~/.zshrc   # or ~/.bashrc — loads the lazyops alias
+lazyops --help    # works from any directory
+```
+
+`setup.sh` adds a global shell alias pointing at the repo wrapper (which always uses `.venv`):
+
+```bash
+alias lazyops='/path/to/LazyOps/lazyops'
+export LAZYOPS_ROOT='/path/to/LazyOps'
+```
+
+You can also run from the repo without the alias:
+
+```bash
+./lazyops --help
+source .venv/bin/activate
+```
+
+For development scripts:
+
+```bash
+./scripts/with-venv python scripts/update_workflow_yamls.py
+```
 
 ## Example Manifest
 

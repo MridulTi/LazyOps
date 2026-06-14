@@ -1,8 +1,8 @@
 id: route53-domain-creation
 
-name: Route53 Domain Creation
+name: "Route53 Domain Creation"
 
-description: Create Route53 CNAME records from a CSV file. Required env: DOMAIN_COLUMN (default: domain), ALB_COLUMN (default: alb_endpoint).
+description: "Create Route53 CNAME records from a CSV file. Required env: DOMAIN_COLUMN (default: domain), ALB_COLUMN (default: alb_endpoint)."
 
 runtime: python
 

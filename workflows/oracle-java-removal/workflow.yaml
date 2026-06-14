@@ -1,8 +1,8 @@
 id: oracle-java-removal
 
-name: Oracle Java Removal
+name: "Oracle Java Removal"
 
-description: Oracle Java Removal
+description: "Oracle Java Removal"
 
 runtime: python
 

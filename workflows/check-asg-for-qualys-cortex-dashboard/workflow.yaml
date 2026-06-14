@@ -1,8 +1,8 @@
 id: check-asg-for-qualys-cortex-dashboard
 
-name: Check ASG For Qualys Cortex Dashboard
+name: "Check ASG For Qualys Cortex Dashboard"
 
-description: Verify Qualys/Cortex agents on IPs from a list file. Required env: SSH_KEY_DIR, ACTIVATION_IDS_FILE (default: activation-ids.txt), DIST_IDS_FILE (default: dist-ids.txt).
+description: "Verify Qualys/Cortex agents on IPs from a list file. Required env: SSH_KEY_DIR, ACTIVATION_IDS_FILE (default: activation-ids.txt), DIST_IDS_FILE (default: dist-ids.txt)."
 
 runtime: bash
 

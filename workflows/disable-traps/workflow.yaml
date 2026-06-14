@@ -1,8 +1,8 @@
 id: disable-traps
 
-name: Disable Traps
+name: "Disable Traps"
 
-description: Disable Traps
+description: "Disable Traps"
 
 runtime: bash
 

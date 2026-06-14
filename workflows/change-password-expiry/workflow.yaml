@@ -1,8 +1,8 @@
 id: change-password-expiry
 
-name: Change Password Expiry
+name: "Change Password Expiry"
 
-description: Change Password Expiry
+description: "Change Password Expiry"
 
 runtime: bash
 

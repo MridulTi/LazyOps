@@ -1,8 +1,8 @@
 id: sg-to-csv
 
-name: SG To CSV
+name: "SG To CSV"
 
-description: Export inbound security group rules to CSV.
+description: "Export inbound security group rules to CSV."
 
 runtime: bash
 

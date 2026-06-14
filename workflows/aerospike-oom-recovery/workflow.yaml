@@ -1,8 +1,8 @@
 id: aerospike-oom-recovery
 
-name: Aerospike Oom Recovery
+name: "Aerospike Oom Recovery"
 
-description: Aerospike Oom Recovery
+description: "Aerospike Oom Recovery"
 
 runtime: bash
 

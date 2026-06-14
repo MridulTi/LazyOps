@@ -1,8 +1,8 @@
 id: check-asg-for-qualys-cortex
 
-name: Check ASG For Qualys Cortex
+name: "Check ASG For Qualys Cortex"
 
-description: Verify Qualys/Cortex on target IPs. Required env: AWS_REGION or REGION.
+description: "Verify Qualys/Cortex on target IPs. Required env: AWS_REGION or REGION."
 
 runtime: bash
 

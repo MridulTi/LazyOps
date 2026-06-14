@@ -1,8 +1,8 @@
 id: finalcostoptall
 
-name: Final Cost Opt All
+name: "Final Cost Opt All"
 
-description: Cost optimization analysis across AWS resources. Required env: AWS_REGION (or pass region as arg).
+description: "Cost optimization analysis across AWS resources. Required env: AWS_REGION (or pass region as arg)."
 
 runtime: python
 

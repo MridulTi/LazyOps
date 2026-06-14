@@ -1,8 +1,8 @@
 id: asg-ips
 
-name: Asg Ips
+name: "Asg Ips"
 
-description: Asg Ips
+description: "Asg Ips"
 
 runtime: bash
 

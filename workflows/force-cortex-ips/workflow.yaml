@@ -1,8 +1,8 @@
 id: force-cortex-ips
 
-name: Force Cortex IPs
+name: "Force Cortex IPs"
 
-description: Force Cortex reinstall on IPs from a file.
+description: "Force Cortex reinstall on IPs from a file."
 
 runtime: bash
 

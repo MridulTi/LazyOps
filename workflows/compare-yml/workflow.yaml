@@ -1,8 +1,8 @@
 id: compare-yml
 
-name: Compare Yml
+name: "Compare Yml"
 
-description: Compare nodegroup-name values between prod and DR helm values directories.
+description: "Compare nodegroup-name values between prod and DR helm values directories."
 
 runtime: bash
 

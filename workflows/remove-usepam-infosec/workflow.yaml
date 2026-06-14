@@ -1,8 +1,8 @@
 id: remove-usepam-infosec
 
-name: Remove Usepam Infosec
+name: "Remove Usepam Infosec"
 
-description: Remove Usepam Infosec
+description: "Remove Usepam Infosec"
 
 runtime: bash
 

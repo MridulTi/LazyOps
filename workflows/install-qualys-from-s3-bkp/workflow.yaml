@@ -1,8 +1,8 @@
 id: install-qualys-from-s3-bkp
 
-name: Install Qualys From S3 Bkp
+name: "Install Qualys From S3 Bkp"
 
-description: Install Qualys From S3 Bkp
+description: "Install Qualys From S3 Bkp"
 
 runtime: bash
 

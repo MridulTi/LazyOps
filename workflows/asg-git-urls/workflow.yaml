@@ -1,8 +1,8 @@
 id: asg-git-urls
 
-name: ASG Git URLs
+name: "ASG Git URLs"
 
-description: Extract git URLs from Auto Scaling group user data. Required env: ASG_FILE (optional alternative to arg).
+description: "Extract git URLs from Auto Scaling group user data. Required env: ASG_FILE (optional alternative to arg)."
 
 runtime: python
 

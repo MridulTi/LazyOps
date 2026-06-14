@@ -1,8 +1,8 @@
 id: compare-kafka
 
-name: Compare Kafka
+name: "Compare Kafka"
 
-description: Compare Kafka
+description: "Compare Kafka"
 
 runtime: bash
 

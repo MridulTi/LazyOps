@@ -1,8 +1,8 @@
 id: lb-details
 
-name: LB Details
+name: "LB Details"
 
-description: Show load balancer details in a region. Required env: AWS_REGION or REGION.
+description: "Show load balancer details in a region. Required env: AWS_REGION or REGION."
 
 runtime: bash
 

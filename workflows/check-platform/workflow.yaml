@@ -1,8 +1,8 @@
 id: check-platform
 
-name: Check Platform
+name: "Check Platform"
 
-description: SSH OS check on running EC2 instances matching a tag filter. Required env: AWS_REGION or REGION, SSH_KEY_PATH, EC2_TAG_FILTER.
+description: "SSH OS check on running EC2 instances matching a tag filter. Required env: AWS_REGION or REGION, SSH_KEY_PATH, EC2_TAG_FILTER."
 
 runtime: bash
 

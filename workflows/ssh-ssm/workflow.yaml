@@ -1,8 +1,8 @@
 id: ssh-ssm
 
-name: Ssh Ssm
+name: "Ssh Ssm"
 
-description: Ssh Ssm
+description: "Ssh Ssm"
 
 runtime: bash
 

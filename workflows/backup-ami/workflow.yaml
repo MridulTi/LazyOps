@@ -1,8 +1,8 @@
 id: backup-ami
 
-name: Backup AMI
+name: "Backup AMI"
 
-description: Backup AMI from IPs in an input file.
+description: "Backup AMI from IPs in an input file."
 
 runtime: bash
 

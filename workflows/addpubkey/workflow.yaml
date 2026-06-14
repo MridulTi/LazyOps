@@ -1,8 +1,8 @@
 id: addpubkey
 
-name: Addpubkey
+name: "Addpubkey"
 
-description: Addpubkey
+description: "Addpubkey"
 
 runtime: bash
 

@@ -1,8 +1,8 @@
 id: addpatchclasstag
 
-name: Add Patch Class Tag
+name: "Add Patch Class Tag"
 
-description: Add patch class tags to instances. Required env: AWS_REGION or REGION.
+description: "Add patch class tags to instances. Required env: AWS_REGION or REGION."
 
 runtime: bash
 

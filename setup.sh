@@ -2,45 +2,68 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PYTHON=${PYTHON:-python3}
+# shellcheck source=scripts/ensure_venv.sh
+source "$ROOT_DIR/scripts/ensure_venv.sh"
 
-if ! command -v "$PYTHON" >/dev/null 2>&1; then
-  echo "Python 3 is required. Install it or set PYTHON=python3"
+chmod +x "$ROOT_DIR/lazyops" "$ROOT_DIR/scripts/with-venv" "$ROOT_DIR/scripts/ensure_venv.sh"
+
+LAZYOPS_BIN="$VENV_DIR/bin/lazyops"
+if [[ ! -x "$LAZYOPS_BIN" ]]; then
+  echo "Installation failed: $LAZYOPS_BIN not found" >&2
   exit 1
 fi
 
-echo "Installing LazyOps package..."
-"$PYTHON" -m pip install --upgrade pip setuptools wheel
-"$PYTHON" -m pip install --user -e "$ROOT_DIR"
-
-if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-  SHELL_RC=""
-  if [[ -n "${ZSH_VERSION-}" ]]; then
-    SHELL_RC="$HOME/.zshrc"
-  elif [[ -n "${BASH_VERSION-}" ]]; then
-    SHELL_RC="$HOME/.bashrc"
-  else
-    SHELL_RC="$HOME/.profile"
+shell_rc_files() {
+  local files=()
+  case "${SHELL:-}" in
+    */zsh) files+=("$HOME/.zshrc") ;;
+    */bash) files+=("$HOME/.bashrc") ;;
+  esac
+  [[ -f "$HOME/.zshrc" ]] && [[ " ${files[*]} " != *" $HOME/.zshrc "* ]] && files+=("$HOME/.zshrc")
+  [[ -f "$HOME/.bashrc" ]] && [[ " ${files[*]} " != *" $HOME/.bashrc "* ]] && files+=("$HOME/.bashrc")
+  if [[ ${#files[@]} -eq 0 ]]; then
+    files+=("$HOME/.profile")
   fi
-  echo "Adding ~/.local/bin to PATH in $SHELL_RC"
-  printf '\n# Added by LazyOps installer\nexport PATH="\$HOME/.local/bin:\$PATH"\n' >> "$SHELL_RC"
-  echo "Please restart your shell or run: source $SHELL_RC"
-fi
+  printf '%s\n' "${files[@]}"
+}
 
-if ! command -v lazyops >/dev/null 2>&1; then
-  echo "Creating shell alias for lazyops command..."
-  SHELL_RC=""
-  if [[ -n "${ZSH_VERSION-}" ]]; then
-    SHELL_RC="$HOME/.zshrc"
-  elif [[ -n "${BASH_VERSION-}" ]]; then
-    SHELL_RC="$HOME/.bashrc"
-  else
-    SHELL_RC="$HOME/.profile"
-  fi
-  grep -qxF "alias lazyops='python3 -m lazyops_cli.cli'" "$SHELL_RC" 2>/dev/null || \
-    printf '\n# Alias for LazyOps CLI\nalias lazyops=\'python3 -m lazyops_cli.cli\'\n' >> "$SHELL_RC"
-  echo "Added alias to $SHELL_RC"
-  echo "Use: source $SHELL_RC or open a new shell to activate the alias"
-fi
+setup_shell_alias() {
+  local marker alias_line export_line tmp rc_file
+  marker="# LazyOps CLI"
+  alias_line="alias lazyops='$ROOT_DIR/lazyops'"
+  export_line="export LAZYOPS_ROOT='$ROOT_DIR'"
 
-echo "Installation complete. You can run: lazyops --help"
+  while IFS= read -r rc_file; do
+    [[ -z "$rc_file" ]] && continue
+    tmp="$(mktemp)"
+    touch "$rc_file"
+    grep -v "^alias lazyops=" "$rc_file" \
+      | grep -v "^export LAZYOPS_ROOT=" \
+      | grep -Fv "$marker" > "$tmp" || true
+
+    {
+      cat "$tmp"
+      echo ""
+      echo "$marker"
+      echo "$export_line"
+      echo "$alias_line"
+    } > "${rc_file}.lazyops.tmp"
+    mv "${rc_file}.lazyops.tmp" "$rc_file"
+    rm -f "$tmp"
+
+    echo "Configured global lazyops alias in $rc_file"
+  done < <(shell_rc_files)
+
+  echo "  $export_line"
+  echo "  $alias_line"
+  echo "Reload your shell: source ~/.zshrc  (or source ~/.bashrc)"
+}
+
+setup_shell_alias
+
+echo ""
+echo "Installation complete."
+echo "  From anywhere: lazyops --help   (after: source ~/.zshrc)"
+echo "  From repo:     $ROOT_DIR/lazyops --help"
+echo "  Activate venv: source $VENV_DIR/bin/activate"
+echo "  Dev scripts:   $ROOT_DIR/scripts/with-venv python scripts/update_workflow_yamls.py"

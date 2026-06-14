@@ -1,8 +1,8 @@
 id: migrate-repo-all-branch
 
-name: Migrate Repo All Branch
+name: "Migrate Repo All Branch"
 
-description: Migrate all branches in Bitbucket repos using a JSON config file. Required env: BB_USER, BB_TOKEN.
+description: "Migrate all branches in Bitbucket repos using a JSON config file. Required env: BB_USER, BB_TOKEN."
 
 runtime: python
 

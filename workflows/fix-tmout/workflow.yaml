@@ -1,8 +1,8 @@
 id: fix-tmout
 
-name: Fix Tmout
+name: "Fix Tmout"
 
-description: Fix TMOUT readonly issue on remote servers.
+description: "Fix TMOUT readonly issue on remote servers."
 
 runtime: bash
 

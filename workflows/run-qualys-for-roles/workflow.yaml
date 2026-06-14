@@ -1,8 +1,8 @@
 id: run-qualys-for-roles
 
-name: Run Qualys For Roles
+name: "Run Qualys For Roles"
 
-description: Assume IAM roles from a file and run the Qualys repair playbook for each. Required env: ROLE_ARNS_FILE (default: roles.txt).
+description: "Assume IAM roles from a file and run the Qualys repair playbook for each. Required env: ROLE_ARNS_FILE (default: roles.txt)."
 
 runtime: bash
 

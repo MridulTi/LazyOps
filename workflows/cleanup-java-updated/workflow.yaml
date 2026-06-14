@@ -1,8 +1,8 @@
 id: cleanup-java-updated
 
-name: Cleanup Java Updated
+name: "Cleanup Java Updated"
 
-description: Cleanup Java Updated
+description: "Cleanup Java Updated"
 
 runtime: python
 

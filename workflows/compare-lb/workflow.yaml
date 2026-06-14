@@ -1,8 +1,8 @@
 id: compare-lb
 
-name: Compare Lb
+name: "Compare Lb"
 
-description: Compare Lb
+description: "Compare Lb"
 
 runtime: bash
 

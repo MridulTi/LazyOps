@@ -1,8 +1,8 @@
 id: clone-repo
 
-name: Clone Repo
+name: "Clone Repo"
 
-description: Clone Bitbucket repositories from a list file.
+description: "Clone Bitbucket repositories from a list file."
 
 runtime: bash
 

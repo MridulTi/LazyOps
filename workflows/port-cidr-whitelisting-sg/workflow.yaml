@@ -1,8 +1,8 @@
 id: port-cidr-whitelisting-sg
 
-name: Port CIDR Whitelisting SG
+name: "Port CIDR Whitelisting SG"
 
-description: Whitelist a CIDR and ports on security groups in a region.
+description: "Whitelist a CIDR and ports on security groups in a region."
 
 runtime: bash
 

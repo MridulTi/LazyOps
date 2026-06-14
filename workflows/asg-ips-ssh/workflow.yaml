@@ -1,8 +1,8 @@
 id: asg-ips-ssh
 
-name: Asg Ips Ssh
+name: "Asg Ips Ssh"
 
-description: Asg Ips Ssh
+description: "Asg Ips Ssh"
 
 runtime: bash
 

@@ -1,8 +1,8 @@
 id: restart-pods
 
-name: Restart Pods
+name: "Restart Pods"
 
-description: Restart unhealthy Kubernetes deployments.
+description: "Restart unhealthy Kubernetes deployments."
 
 runtime: bash
 

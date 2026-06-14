@@ -1,8 +1,8 @@
 id: change-bash-login
 
-name: Change Bash Login
+name: "Change Bash Login"
 
-description: Change Bash Login
+description: "Change Bash Login"
 
 runtime: bash
 

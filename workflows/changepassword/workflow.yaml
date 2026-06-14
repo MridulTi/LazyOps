@@ -1,8 +1,8 @@
 id: changepassword
 
-name: Changepassword
+name: "Changepassword"
 
-description: Changepassword
+description: "Changepassword"
 
 runtime: bash
 

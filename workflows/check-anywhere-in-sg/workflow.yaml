@@ -1,8 +1,8 @@
 id: check-anywhere-in-sg
 
-name: Check Anywhere In Sg
+name: "Check Anywhere In Sg"
 
-description: Check Anywhere In Sg
+description: "Check Anywhere In Sg"
 
 runtime: bash
 

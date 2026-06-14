@@ -1,8 +1,8 @@
 id: jenkins-inplace-upgrade
 
-name: Jenkins Inplace Upgrade
+name: "Jenkins Inplace Upgrade"
 
-description: Jenkins Inplace Upgrade
+description: "Jenkins Inplace Upgrade"
 
 runtime: bash
 

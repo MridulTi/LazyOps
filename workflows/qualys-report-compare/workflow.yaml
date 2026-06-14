@@ -1,8 +1,8 @@
 id: qualys-report-compare
 
-name: Qualys Report Compare
+name: "Qualys Report Compare"
 
-description: Qualys Report Compare
+description: "Qualys Report Compare"
 
 runtime: python
 

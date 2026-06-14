@@ -1,8 +1,8 @@
 id: check-userdata-for-bitbucket
 
-name: Check Userdata For Bitbucket
+name: "Check Userdata For Bitbucket"
 
-description: Find EC2 instances whose user data contains a search string. Required env: SEARCH_TEXT.
+description: "Find EC2 instances whose user data contains a search string. Required env: SEARCH_TEXT."
 
 runtime: python
 

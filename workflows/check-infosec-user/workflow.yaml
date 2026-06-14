@@ -1,8 +1,8 @@
 id: check-infosec-user
 
-name: Check Infosec User
+name: "Check Infosec User"
 
-description: Check Infosec User
+description: "Check Infosec User"
 
 runtime: bash
 

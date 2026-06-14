@@ -1,8 +1,8 @@
 id: siem-installation
 
-name: Siem Installation
+name: "Siem Installation"
 
-description: Siem Installation
+description: "Siem Installation"
 
 runtime: python
 

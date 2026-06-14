@@ -1,8 +1,8 @@
 id: check-userdata-bitbucket-asg
 
-name: Check Userdata Bitbucket ASG
+name: "Check Userdata Bitbucket ASG"
 
-description: Find ASGs whose launch template user data contains a search string. Required env: SEARCH_TEXT.
+description: "Find ASGs whose launch template user data contains a search string. Required env: SEARCH_TEXT."
 
 runtime: python
 

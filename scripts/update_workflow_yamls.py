@@ -463,6 +463,12 @@ def detect_inputs_from_script(script_path: Path) -> list[dict]:
     return inputs[:10]
 
 
+def quote_yaml(value: str) -> str:
+    """Return a YAML-safe quoted string."""
+    escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{escaped}"'
+
+
 def build_description(base: str, env: list[str] | None) -> str:
     if not env:
         return base
@@ -480,9 +486,9 @@ def render_yaml(
     lines = [
         f"id: {workflow_id}",
         "",
-        f"name: {name}",
+        f"name: {quote_yaml(name)}",
         "",
-        f"description: {description}",
+        f"description: {quote_yaml(description)}",
         "",
         f"runtime: {runtime}",
         "",

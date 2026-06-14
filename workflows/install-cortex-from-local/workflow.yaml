@@ -1,8 +1,8 @@
 id: install-cortex-from-local
 
-name: Install Cortex From Local
+name: "Install Cortex From Local"
 
-description: Install Cortex agent from local packages via SSH. Required env: config file path as arg, AWS_REGION, SSH_KEY_DIR.
+description: "Install Cortex agent from local packages via SSH. Required env: config file path as arg, AWS_REGION, SSH_KEY_DIR."
 
 runtime: python
 

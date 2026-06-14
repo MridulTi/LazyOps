@@ -1,8 +1,8 @@
 id: chek-ips-exist
 
-name: Check IPs Exist
+name: "Check IPs Exist"
 
-description: Verify IPs exist in EC2.
+description: "Verify IPs exist in EC2."
 
 runtime: bash
 

@@ -1,8 +1,8 @@
 id: install-qualys-cortex-from-local
 
-name: Install Qualys Cortex From Local
+name: "Install Qualys Cortex From Local"
 
-description: Install Qualys and Cortex from local packages via SSH. Required env: config file path as arg, AWS_REGION, SSH_KEY_DIR.
+description: "Install Qualys and Cortex from local packages via SSH. Required env: config file path as arg, AWS_REGION, SSH_KEY_DIR."
 
 runtime: python
 

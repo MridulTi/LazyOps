@@ -1,8 +1,8 @@
 id: hostnamefinder
 
-name: Hostnamefinder
+name: "Hostnamefinder"
 
-description: Hostnamefinder
+description: "Hostnamefinder"
 
 runtime: bash
 

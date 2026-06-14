@@ -1,8 +1,8 @@
 id: check-ami
 
-name: Check Ami
+name: "Check Ami"
 
-description: Check Ami
+description: "Check Ami"
 
 runtime: bash
 

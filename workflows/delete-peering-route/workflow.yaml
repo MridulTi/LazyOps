@@ -1,8 +1,8 @@
 id: delete-peering-route
 
-name: Delete Peering Route
+name: "Delete Peering Route"
 
-description: Clean peering route tables with JSON backup. DRY_RUN defaults to true. Required env: AWS_REGION or REGION, DRY_RUN (default: true).
+description: "Clean peering route tables with JSON backup. DRY_RUN defaults to true. Required env: AWS_REGION or REGION, DRY_RUN (default: true)."
 
 runtime: python
 

@@ -1,8 +1,8 @@
 id: rpm-check-all
 
-name: Rpm Check All
+name: "Rpm Check All"
 
-description: Rpm Check All
+description: "Rpm Check All"
 
 runtime: bash
 

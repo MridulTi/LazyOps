@@ -1,8 +1,8 @@
 id: change-user-shell
 
-name: Change User Shell
+name: "Change User Shell"
 
-description: Change User Shell
+description: "Change User Shell"
 
 runtime: bash
 

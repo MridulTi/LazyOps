@@ -1,8 +1,8 @@
 id: check-user-data-ips
 
-name: Check User Data IPs
+name: "Check User Data IPs"
 
-description: Check user data on instances from an IP list file. Required env: AWS_REGION or REGION.
+description: "Check user data on instances from an IP list file. Required env: AWS_REGION or REGION."
 
 runtime: bash
 

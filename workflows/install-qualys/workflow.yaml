@@ -1,8 +1,8 @@
 id: install-qualys
 
-name: Install Qualys
+name: "Install Qualys"
 
-description: Install Qualys
+description: "Install Qualys"
 
 runtime: bash
 

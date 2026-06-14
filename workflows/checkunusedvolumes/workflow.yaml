@@ -1,8 +1,8 @@
 id: checkunusedvolumes
 
-name: Check Unused Volumes
+name: "Check Unused Volumes"
 
-description: Audit unused EBS volumes, AMIs, snapshots, and security groups. Required env: AWS_REGION or REGION.
+description: "Audit unused EBS volumes, AMIs, snapshots, and security groups. Required env: AWS_REGION or REGION."
 
 runtime: bash
 

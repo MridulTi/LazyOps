@@ -1,8 +1,8 @@
 id: check-connection
 
-name: Check Connection
+name: "Check Connection"
 
-description: Check Connection
+description: "Check Connection"
 
 runtime: bash
 
