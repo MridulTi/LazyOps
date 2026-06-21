@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Run a command with LazyOps .venv (e.g. ./scripts/with-venv python scripts/foo.py)
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=ensure_venv.sh
+source "$ROOT_DIR/scripts/ensure_venv.sh"
+
+if [[ $# -eq 0 ]]; then
+  echo "Usage: $0 <command> [args...]" >&2
+  exit 1
+fi
+
+exec "$@"
