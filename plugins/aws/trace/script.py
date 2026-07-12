@@ -47,8 +47,10 @@ IP_RE = re.compile(r"\b(\d{1,3}(?:\.\d{1,3}){3})\b")
 # CMDB Node API paths (https://cmdb.paytmpayments.com/node/api/...)
 DEFAULT_CMDB_API_PREFIX = "/node/api"
 CMDB_PATH_INSTANCES = "/instances"
-CMDB_PATH_ALBS = "/albs"
-CMDB_PATH_ROUTE53 = "/route53"
+CMDB_ALB_PATHS = ("/alb", "/albs")
+CMDB_INSTANCE_PATHS = ("/instances", "/ec2")
+CMDB_ROUTE53_PATHS = ("/route53", "/route53-records")
+LB_REGION_RE = re.compile(r"\.([a-z0-9-]+)\.elb\.amazonaws\.com\.?$", re.IGNORECASE)
 
 
 @dataclass
@@ -81,6 +83,9 @@ class TraceResult:
     backends: list[BackendTarget] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     cmdb_available: bool = True
+    cmdb_alb_count: int = 0
+    cmdb_instance_count: int = 0
+    cmdb_alb_path: str = ""
 
 
 def normalize_domain(raw: str) -> str:
@@ -210,36 +215,75 @@ def cmdb_get(base_url: str, path: str, timeout: int = 60) -> Any:
     return resp.json()
 
 
-def extract_cmdb_rows(payload: Any) -> list[dict[str, Any]]:
+def extract_cmdb_rows(payload: Any, hint: str = "") -> list[dict[str, Any]]:
     """Normalize CMDB list responses (Node API or legacy Django shape)."""
     if isinstance(payload, list):
         return [row for row in payload if isinstance(row, dict)]
     if isinstance(payload, dict):
-        for key in ("results", "data", "items", "rows"):
-            rows = payload.get(key)
+        if hint:
+            for key in (hint, f"{hint}s", hint.rstrip("s")):
+                rows = payload.get(key)
+                if isinstance(rows, list):
+                    return [row for row in rows if isinstance(row, dict)]
+        lower = {str(k).lower(): v for k, v in payload.items()}
+        for key in (
+            "results",
+            "data",
+            "items",
+            "rows",
+            "instances",
+            "instance",
+            "albs",
+            "alb",
+            "ec2",
+            "route53",
+            "route53records",
+            "records",
+        ):
+            rows = payload.get(key) if key in payload else lower.get(key)
             if isinstance(rows, list):
                 return [row for row in rows if isinstance(row, dict)]
+        nested = payload.get("data")
+        if isinstance(nested, dict):
+            return extract_cmdb_rows(nested, hint)
+        if isinstance(nested, list):
+            return [row for row in nested if isinstance(row, dict)]
     return []
 
 
 def _pick(row: dict[str, Any], *keys: str) -> Any:
+    if not row:
+        return ""
+    lower_map = {str(k).lower(): v for k, v in row.items()}
     for key in keys:
         if key in row and row[key] not in (None, ""):
             return row[key]
+        val = lower_map.get(key.lower())
+        if val not in (None, ""):
+            return val
     return ""
 
 
 def normalize_alb(row: dict[str, Any]) -> dict[str, Any]:
     return {
-        "name": _pick(row, "name", "alb_name", "albName", "load_balancer_name"),
+        "name": _pick(
+            row,
+            "name",
+            "alb_name",
+            "albName",
+            "load_balancer_name",
+            "LoadBalancerName",
+        ),
         "dns_name": _pick(row, "dns_name", "dnsName", "DNSName", "dns"),
-        "arn": _pick(row, "arn", "load_balancer_arn", "loadBalancerArn"),
-        "account_id": _pick(row, "account_id", "accountId", "account"),
-        "region": _pick(row, "region", "aws_region", "awsRegion"),
-        "scheme": _pick(row, "scheme"),
+        "arn": _pick(row, "arn", "load_balancer_arn", "loadBalancerArn", "LoadBalancerArn"),
+        "account_id": _pick(row, "account_id", "accountId", "AccountId", "account"),
+        "region": _pick(row, "region", "aws_region", "awsRegion", "Region"),
+        "scheme": _pick(row, "scheme", "Scheme"),
         "route53_records": row.get("route53_records")
         or row.get("route53Records")
+        or row.get("Route53Records")
         or row.get("domains")
+        or row.get("Domains")
         or [],
     }
 
@@ -247,12 +291,14 @@ def normalize_alb(row: dict[str, Any]) -> dict[str, Any]:
 def normalize_instance(row: dict[str, Any]) -> dict[str, Any]:
     return {
         "instance_id": _pick(row, "instance_id", "instanceId", "InstanceId", "id"),
-        "private_ip": _pick(row, "private_ip", "privateIp", "privateIP", "PrivateIpAddress"),
+        "private_ip": _pick(
+            row, "private_ip", "privateIp", "privateIP", "PrivateIpAddress"
+        ),
         "name_tag": _pick(row, "name_tag", "nameTag", "Name", "name"),
         "patch_class": _pick(row, "patch_class", "patchClass", "patch_class_tag"),
-        "state": _pick(row, "state", "instance_state", "instanceState"),
-        "account_id": _pick(row, "account_id", "accountId", "account"),
-        "region": _pick(row, "region", "aws_region", "awsRegion"),
+        "state": _pick(row, "state", "State", "instance_state", "instanceState"),
+        "account_id": _pick(row, "account_id", "accountId", "AccountId", "account"),
+        "region": _pick(row, "region", "aws_region", "awsRegion", "Region"),
     }
 
 
@@ -268,19 +314,43 @@ def cmdb_api_path(prefix: str, resource: str) -> str:
     return f"{prefix.rstrip('/')}/{resource.lstrip('/')}"
 
 
-def fetch_cmdb_albs(base_url: str, api_prefix: str) -> list[dict[str, Any]]:
-    payload = cmdb_get(base_url, cmdb_api_path(api_prefix, CMDB_PATH_ALBS))
-    return [normalize_alb(row) for row in extract_cmdb_rows(payload)]
+def fetch_cmdb_list(
+    base_url: str,
+    api_prefix: str,
+    path_candidates: tuple[str, ...],
+    hint: str,
+    normalize_fn,
+) -> tuple[list[dict[str, Any]], str]:
+    last_error: requests.RequestException | None = None
+    for suffix in path_candidates:
+        try:
+            payload = cmdb_get(base_url, cmdb_api_path(api_prefix, suffix))
+            rows = [normalize_fn(row) for row in extract_cmdb_rows(payload, hint)]
+            if rows:
+                return rows, suffix
+        except requests.RequestException as exc:
+            last_error = exc
+            continue
+    if last_error:
+        raise last_error
+    return [], path_candidates[0]
 
 
-def fetch_cmdb_ec2(base_url: str, api_prefix: str) -> list[dict[str, Any]]:
-    payload = cmdb_get(base_url, cmdb_api_path(api_prefix, CMDB_PATH_INSTANCES))
-    return [normalize_instance(row) for row in extract_cmdb_rows(payload)]
+def fetch_cmdb_albs(base_url: str, api_prefix: str) -> tuple[list[dict[str, Any]], str]:
+    return fetch_cmdb_list(base_url, api_prefix, CMDB_ALB_PATHS, "alb", normalize_alb)
+
+
+def fetch_cmdb_ec2(base_url: str, api_prefix: str) -> tuple[list[dict[str, Any]], str]:
+    return fetch_cmdb_list(
+        base_url, api_prefix, CMDB_INSTANCE_PATHS, "instances", normalize_instance
+    )
 
 
 def fetch_cmdb_route53(base_url: str, api_prefix: str) -> list[dict[str, Any]]:
-    payload = cmdb_get(base_url, cmdb_api_path(api_prefix, CMDB_PATH_ROUTE53))
-    return [normalize_route53(row) for row in extract_cmdb_rows(payload)]
+    rows, _ = fetch_cmdb_list(
+        base_url, api_prefix, CMDB_ROUTE53_PATHS, "route53", normalize_route53
+    )
+    return rows
 
 
 def match_alb_in_cmdb(albs: list[dict], lb_hostname: str) -> dict[str, Any] | None:
@@ -289,6 +359,31 @@ def match_alb_in_cmdb(albs: list[dict], lb_hostname: str) -> dict[str, Any] | No
         dns = (alb.get("dns_name") or "").rstrip(".").lower()
         if dns == target:
             return alb
+    return None
+
+
+def parse_region_from_lb_hostname(hostname: str) -> str:
+    m = LB_REGION_RE.search(hostname.rstrip("."))
+    return m.group(1) if m else ""
+
+
+def lookup_alb_in_aws(lb_hostname: str, region: str) -> dict[str, Any] | None:
+    target = lb_hostname.rstrip(".").lower()
+    elbv2 = boto3.client("elbv2", region_name=region)
+    paginator = elbv2.get_paginator("describe_load_balancers")
+    for page in paginator.paginate():
+        for lb in page.get("LoadBalancers") or []:
+            dns = (lb.get("DNSName") or "").rstrip(".").lower()
+            if dns == target:
+                return {
+                    "name": lb.get("LoadBalancerName") or "",
+                    "dns_name": lb.get("DNSName") or "",
+                    "arn": lb.get("LoadBalancerArn") or "",
+                    "region": region,
+                    "scheme": lb.get("Scheme") or "",
+                    "route53_records": [],
+                    "source": "aws",
+                }
     return None
 
 
@@ -446,8 +541,16 @@ def trace_domain(
     ec2_rows: list[dict] = []
     if use_cmdb:
         try:
-            albs = fetch_cmdb_albs(cmdb_url, api_prefix)
-            ec2_rows = fetch_cmdb_ec2(cmdb_url, api_prefix)
+            albs, alb_path = fetch_cmdb_albs(cmdb_url, api_prefix)
+            ec2_rows, _ = fetch_cmdb_ec2(cmdb_url, api_prefix)
+            result.cmdb_alb_count = len(albs)
+            result.cmdb_instance_count = len(ec2_rows)
+            result.cmdb_alb_path = alb_path
+            if not albs:
+                result.warnings.append(
+                    f"CMDB returned 0 ALBs from {api_prefix}{alb_path} "
+                    f"(instances loaded: {len(ec2_rows)})"
+                )
         except requests.RequestException as exc:
             result.cmdb_available = False
             result.warnings.append(f"CMDB unreachable: {exc}")
@@ -478,6 +581,32 @@ def trace_domain(
 
     if use_cmdb and result.cmdb_available and result.lb_hostname:
         result.alb_match = match_alb_in_cmdb(albs, result.lb_hostname)
+        if not result.alb_match and result.cmdb_alb_count:
+            result.warnings.append(
+                f"CMDB ALB DNS match failed among {result.cmdb_alb_count} ALBs "
+                f"for {result.lb_hostname}"
+            )
+
+    if (
+        not result.alb_match
+        and result.lb_hostname
+        and source != "cmdb"
+    ):
+        region = region_override or parse_region_from_lb_hostname(result.lb_hostname)
+        if region:
+            try:
+                aws_alb = lookup_alb_in_aws(result.lb_hostname, region)
+                if aws_alb:
+                    result.alb_match = aws_alb
+                    result.warnings.append(
+                        "Resolved ALB via AWS API (CMDB ALB match unavailable)"
+                    )
+            except (ClientError, BotoCoreError) as exc:
+                result.warnings.append(f"AWS ALB lookup failed: {exc}")
+        elif not result.alb_match:
+            result.warnings.append(
+                "Could not parse region from LB hostname; pass --region ap-south-1"
+            )
 
     if not result.lb_hostname and result.dns_chain:
         last = result.dns_chain[-1]
@@ -526,7 +655,15 @@ def print_trace(result: TraceResult) -> None:
     print(f"=== Trace: {result.domain} ===")
     print(f"CMDB: {result.cmdb_url}")
     print(f"  API: {result.cmdb_url}{result.cmdb_api_prefix}/instances")
-    print(f"       {result.cmdb_url}{result.cmdb_api_prefix}/albs")
+    if result.cmdb_alb_path:
+        print(f"       {result.cmdb_url}{result.cmdb_api_prefix}{result.cmdb_alb_path}")
+    else:
+        print(f"       {result.cmdb_url}{result.cmdb_api_prefix}/alb")
+    if result.cmdb_alb_count or result.cmdb_instance_count:
+        print(
+            f"  loaded: {result.cmdb_alb_count} ALBs, "
+            f"{result.cmdb_instance_count} instances"
+        )
     print(f"  UI: {result.cmdb_url}/albs-all-accounts")
     print(f"      {result.cmdb_url}/instances-all-accounts")
     print()
@@ -551,6 +688,7 @@ def print_trace(result: TraceResult) -> None:
         print(
             f"  region:   {alb.get('region') or '?'}  "
             f"account: {alb.get('account_id') or '?'}"
+            f"  ({alb.get('source') or 'cmdb'})"
         )
         if domains:
             print(f"  domains:  {', '.join(domains)}")

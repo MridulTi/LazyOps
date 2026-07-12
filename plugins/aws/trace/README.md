@@ -16,9 +16,9 @@ Equivalent: `lazyops run aws/trace <domain> [--cmdb-url ...] [--source auto|cmdb
 
 1. **nslookup** the domain and follow CNAMEs to an ELB hostname
 2. **nslookup** the ELB hostname for front-end IPs
-3. **CMDB** `/node/api/albs` — match `dns_name` (same data as `/albs-all-accounts`)
-4. **CMDB** `/node/api/instances` — enrich instances (same data as `/instances-all-accounts`)
-5. **AWS ELBv2** `describe-target-health` — resolve actual backend targets
+3. **CMDB** `/node/api/alb` (or `/node/api/albs`) — match `DNSName` / `dns_name`
+4. **CMDB** `/node/api/instances` — enrich instances (`InstanceId`, `PrivateIpAddress`, `Name`, …)
+5. **AWS ELBv2** `describe-target-health` — resolve actual backend targets (AWS ALB fallback if CMDB ALB match fails)
 
 ## Requirements
 

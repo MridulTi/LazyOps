@@ -5,7 +5,7 @@
 `lazyops aws trace <domain>` is a thin CLI alias that delegates to the `aws/trace` workflow plugin. The workflow resolves **domain → load balancer → backend EC2 instance IPs** using:
 
 1. Live DNS (`nslookup`, CNAME walk)
-2. CMDB Node API (`/node/api/albs`, `/node/api/instances`, optional `/node/api/route53`)
+2. CMDB Node API (`/node/api/alb` or `/node/api/albs`, `/node/api/instances`, optional `/node/api/route53`)
 3. AWS ELBv2 target health for the final hop to running instances
 
 **Status:** implemented (confirmed). CMDB auth is VPN-only, no API token (confirmed by maintainer).
