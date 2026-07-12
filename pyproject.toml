@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lazyops-cli"
-version = "1.1.0"
+version = "1.1.1"
 description = "CLI to discover, fetch, and run reusable automation workflows from remote plugin packs."
 readme = "README.md"
 requires-python = ">=3.10"
