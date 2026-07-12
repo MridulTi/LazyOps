@@ -1,0 +1,25 @@
+id: trace
+
+name: "AWS Domain Trace"
+
+description: "Trace a domain to ALB and backend EC2 instance IPs via nslookup, CMDB inventory, and AWS target health. Required env: AWS credentials for backend resolution. Optional: LAZYOPS_CMDB_URL, AWS_REGION."
+
+runtime: python
+
+entrypoint: script.py
+
+pack: aws
+
+version: 1.0.0
+
+inputs:
+  - name: domain
+    required: true
+
+tags:
+  - aws
+  - trace
+  - domain
+  - cmdb
+  - route53
+  - alb

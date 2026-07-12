@@ -144,6 +144,8 @@ source:
 packs:
   - aws
   - kubernetes
+cmdb:
+  url: https://cmdb.paytmpayments.com
 ```
 
 ## Commands
@@ -161,6 +163,19 @@ packs:
 | `lazyops run` | Interactive workflow picker |
 | `lazyops list` | List workflows in installed packs |
 | `lazyops search <query>` | Search by name, id, or description |
+| `lazyops aws trace <domain>` | Trace domain → ALB → backend EC2 IPs (CMDB + AWS) |
+
+### AWS trace
+
+Requires the `aws` pack (`lazyops pack add aws`). On VPN, CMDB defaults to `https://cmdb.paytmpayments.com` (override with `--cmdb-url` or `cmdb.url` in `~/.lazyops/config.yaml`).
+
+```bash
+lazyops aws trace seller.example.com
+lazyops aws trace seller.example.com --cmdb-url https://cmdb.paytmpayments.com
+lazyops aws trace seller.example.com --source aws --region ap-south-1
+```
+
+Bundled plugin for local dev: `plugins/aws/trace/`. Copy to [lazyops-plugins](https://github.com/MridulTi/lazyops-plugins) at `plugins/aws/trace/` for remote catalog releases.
 
 ## Example manifest
 

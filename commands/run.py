@@ -5,82 +5,20 @@ import subprocess
 import typer
 import yaml
 
-from registry.discover import read_workflow
-from registry.fetch import FetchError, fetch_pack_dir, fetch_plugin_dir, list_pack_plugins
+from registry.fetch import FetchError, fetch_pack_dir, list_pack_plugins
 from registry.packs import list_packs, pack_installed
-from registry.paths import PROJECT_ROOT, venv_python
+from registry.runner import run_target
 from registry.source import SourceError, get_source
 
 
-def _parse_target(target:str)-> tuple[str,str]:
+def _parse_target(target: str) -> tuple[str, str]:
     if "/" not in target:
         raise typer.BadParameter("Use pack/plugin format, eg. aws/addpatchclasstag")
 
-    pack,plugin = target.split("/",1)
+    pack, plugin = target.split("/", 1)
     if not pack or not plugin:
         raise typer.BadParameter("Use pack/plugin format, e.g. aws/addpatchclasstag")
-    return pack,plugin
-
-def _run_target(pack: str, plugin: str, extra_args: list[str]) -> None:
-    if not pack_installed(pack):
-        typer.secho(
-            f"Pack not installed: {pack}. Run: lazyops pack add {pack}",
-            fg=typer.colors.RED,
-            err=True,
-        )
-        raise typer.Exit(1)
-
-    try:
-        source = get_source()
-    except SourceError as exc:
-        typer.secho(str(exc), fg=typer.colors.RED, err=True)
-        raise typer.Exit(1)
-
-    tmp_root = None
-    workflow_dir = None
-    try:
-        workflow_dir = fetch_plugin_dir(
-            url=source["url"],
-            ref=source["ref"],
-            path_prefix=source.get("path_prefix", "plugins"),
-            pack=pack,
-            plugin=plugin,
-        )
-        tmp_root = workflow_dir.parent.parent
-
-        workflow_path = workflow_dir / "workflow.yaml"
-        workflow = read_workflow(workflow_path)
-        entrypoint = workflow_dir / workflow["entrypoint"]
-        inputs = list(extra_args or [])
-
-        env = os.environ.copy()
-        env.setdefault("LAZYOPS_ROOT", str(PROJECT_ROOT))
-        env.setdefault("WORKFLOW_ID", workflow.get("id", plugin))
-        env.setdefault("WORKFLOW_ROOT", str(workflow_dir))
-        env.setdefault("WORKFLOW_RUNTIME", workflow["runtime"])
-        env.setdefault("WORKFLOW_VERSION", workflow.get("version", "1.0.0"))
-        env.setdefault("WORKFLOW_PACK", pack)
-        env.setdefault("WORKFLOW_PLUGIN", plugin)
-        env.setdefault("WORKFLOW_SOURCE_REF", source["ref"])
-
-        if workflow["runtime"] == "bash":
-            cmd = ["bash", str(entrypoint)] + inputs
-        elif workflow["runtime"] == "python":
-            cmd = [venv_python(), str(entrypoint)] + inputs
-        elif workflow["runtime"] == "node":
-            cmd = ["node", str(entrypoint)] + inputs
-        else:
-            typer.secho(f"Unsupported runtime: {workflow['runtime']}", fg=typer.colors.RED, err=True)
-            raise typer.Exit(1)
-
-        subprocess.run(cmd, check=True, env=env, cwd=workflow_dir)
-
-    except FetchError as exc:
-        typer.secho(f"Failed to fetch workflow: {exc}", fg=typer.colors.RED, err=True)
-        raise typer.Exit(1)
-    finally:
-        if tmp_root is not None:
-            shutil.rmtree(tmp_root, ignore_errors=True)
+    return pack, plugin
 
 
 def _pick_index(prompt: str, max_index: int) -> int:
@@ -141,7 +79,6 @@ def _interactive_run() -> tuple[str, str]:
             pack,
         )
 
-        # plugins list order from git; enrich with local workflow.yaml names
         plugin_labels: dict[str, str] = {}
         for child in pack_dir.iterdir():
             if not child.is_dir() or child.name == "pack.yaml":
@@ -171,6 +108,7 @@ def _interactive_run() -> tuple[str, str]:
 
     return pack, plugin
 
+
 def register(app: typer.Typer):
 
     @app.command("run", help="Run a workflow: lazyops run <pack>/<plugin> [args...]")
@@ -182,4 +120,4 @@ def register(app: typer.Typer):
             pack, plugin = _interactive_run()
         else:
             pack, plugin = _parse_target(target)
-        _run_target(pack, plugin, list(extra_args or []))
+        run_target(pack, plugin, list(extra_args or []))
