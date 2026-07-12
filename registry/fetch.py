@@ -1,13 +1,54 @@
 from __future__ import annotations
 
-import shutil,yaml
+import os
+import shutil
 import subprocess
 import tempfile
 from pathlib import Path
 
+import yaml
+
+from registry.paths import PROJECT_ROOT
+
 
 class FetchError(Exception):
     pass
+
+
+def _local_plugin_dir(pack: str, plugin: str) -> Path | None:
+    """Use bundled or LAZYOPS_PLUGINS_ROOT plugins when present (dev / offline)."""
+    roots: list[Path] = []
+    env_root = os.environ.get("LAZYOPS_PLUGINS_ROOT", "").strip()
+    if env_root:
+        roots.append(Path(env_root))
+    roots.append(PROJECT_ROOT / "plugins")
+    for root in roots:
+        candidate = root / pack / plugin
+        if (candidate / "workflow.yaml").is_file():
+            return candidate
+    return None
+
+
+def list_local_plugins(pack: str) -> list[str]:
+    """Plugin folder names under local plugins/<pack>/ (bundled dev plugins)."""
+    names: list[str] = []
+    roots: list[Path] = []
+    env_root = os.environ.get("LAZYOPS_PLUGINS_ROOT", "").strip()
+    if env_root:
+        roots.append(Path(env_root))
+    roots.append(PROJECT_ROOT / "plugins")
+    seen: set[str] = set()
+    for root in roots:
+        pack_dir = root / pack
+        if not pack_dir.is_dir():
+            continue
+        for child in sorted(pack_dir.iterdir()):
+            if not child.is_dir() or child.name == "pack.yaml":
+                continue
+            if (child / "workflow.yaml").is_file() and child.name not in seen:
+                seen.add(child.name)
+                names.append(child.name)
+    return names
 
 
 def _run_git(args: list[str], cwd: Path | None = None) -> None:
@@ -32,13 +73,16 @@ def fetch_plugin_dir(
     ref: str,
     path_prefix: str,
     pack: str,
-    plugin: str
-) -> Path:
+    plugin: str,
+) -> tuple[Path, Path | None, bool]:
     """
-    Sparse-clone one workflow dir at ref.
-    Returns path to the plugin dir (contains workflow.yaml).
-    Caller deletes parent temp dir when done.
+    Resolve one workflow dir at ref (local plugins first, then sparse git clone).
+    Returns (plugin_dir, tmp_root_or_none, should_delete_tmp).
     """
+    local = _local_plugin_dir(pack, plugin)
+    if local is not None:
+        return local, None, False
+
     rel = plugin_relpath(path_prefix, pack, plugin)
     tmp_root = Path(tempfile.mkdtemp(prefix="lazyops-"))
     repo_dir = tmp_root / "repo"
@@ -64,7 +108,7 @@ def fetch_plugin_dir(
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(str(workflow_dir), str(dest))
         shutil.rmtree(repo_dir, ignore_errors=True)
-        return dest
+        return dest, tmp_root, True
     except Exception:
         shutil.rmtree(tmp_root, ignore_errors=True)
         raise

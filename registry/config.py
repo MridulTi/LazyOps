@@ -6,7 +6,7 @@ import yaml,os
 DEFAULT_CONFIG_DIR = Path(os.environ.get("LAZYOPS_CONFIG_DIR", str(Path.home() / ".lazyops")))
 CONFIG_PATH = DEFAULT_CONFIG_DIR / "config.yaml"
 
-DEFAULT_CONFIG = {"source": None, "packs": []}
+DEFAULT_CONFIG = {"source": None, "packs": [], "cmdb": None}
 
 
 def ensure_config_dir() -> None:
@@ -38,6 +38,12 @@ def _migrate_config(data: dict) -> dict:
         }
     if "packs" not in data or not isinstance(data["packs"], list):
         data["packs"] = []
+    if data.get("cmdb") is None:
+        data["cmdb"] = None
+    elif isinstance(data["cmdb"], dict):
+        data["cmdb"] = {"url": (data["cmdb"].get("url") or "").strip() or None}
+        if data["cmdb"]["url"] is None:
+            data["cmdb"] = None
     return data
 
 def load_config() -> dict:
