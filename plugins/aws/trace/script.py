@@ -7,6 +7,7 @@ DNS-first (nslookup), CMDB inventory cross-reference, AWS ELBv2 target health.
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import shutil
 import socket
@@ -43,6 +44,12 @@ A_LINE_RE = re.compile(
 )
 IP_RE = re.compile(r"\b(\d{1,3}(?:\.\d{1,3}){3})\b")
 
+# CMDB Node API paths (https://cmdb.paytmpayments.com/node/api/...)
+DEFAULT_CMDB_API_PREFIX = "/node/api"
+CMDB_PATH_INSTANCES = "/instances"
+CMDB_PATH_ALBS = "/albs"
+CMDB_PATH_ROUTE53 = "/route53"
+
 
 @dataclass
 class DnsHop:
@@ -66,6 +73,7 @@ class BackendTarget:
 class TraceResult:
     domain: str
     cmdb_url: str
+    cmdb_api_prefix: str = DEFAULT_CMDB_API_PREFIX
     dns_chain: list[DnsHop] = field(default_factory=list)
     lb_hostname: str = ""
     lb_ips: list[str] = field(default_factory=list)
@@ -195,26 +203,84 @@ def resolve_dns_chain(domain: str, max_depth: int = 10) -> tuple[list[DnsHop], s
     return chain, lb_hostname, lb_ips
 
 
-def cmdb_get(base_url: str, path: str, timeout: int = 60) -> dict[str, Any]:
+def cmdb_get(base_url: str, path: str, timeout: int = 60) -> Any:
     url = f"{base_url.rstrip('/')}{path}"
     resp = requests.get(url, timeout=timeout)
     resp.raise_for_status()
     return resp.json()
 
 
-def fetch_cmdb_albs(base_url: str) -> list[dict[str, Any]]:
-    data = cmdb_get(base_url, "/api/alb/")
-    return list(data.get("results") or [])
+def extract_cmdb_rows(payload: Any) -> list[dict[str, Any]]:
+    """Normalize CMDB list responses (Node API or legacy Django shape)."""
+    if isinstance(payload, list):
+        return [row for row in payload if isinstance(row, dict)]
+    if isinstance(payload, dict):
+        for key in ("results", "data", "items", "rows"):
+            rows = payload.get(key)
+            if isinstance(rows, list):
+                return [row for row in rows if isinstance(row, dict)]
+    return []
 
 
-def fetch_cmdb_ec2(base_url: str) -> list[dict[str, Any]]:
-    data = cmdb_get(base_url, "/api/ec2/")
-    return list(data.get("results") or [])
+def _pick(row: dict[str, Any], *keys: str) -> Any:
+    for key in keys:
+        if key in row and row[key] not in (None, ""):
+            return row[key]
+    return ""
 
 
-def fetch_cmdb_route53(base_url: str) -> list[dict[str, Any]]:
-    data = cmdb_get(base_url, "/api/route53/")
-    return list(data.get("results") or [])
+def normalize_alb(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "name": _pick(row, "name", "alb_name", "albName", "load_balancer_name"),
+        "dns_name": _pick(row, "dns_name", "dnsName", "DNSName", "dns"),
+        "arn": _pick(row, "arn", "load_balancer_arn", "loadBalancerArn"),
+        "account_id": _pick(row, "account_id", "accountId", "account"),
+        "region": _pick(row, "region", "aws_region", "awsRegion"),
+        "scheme": _pick(row, "scheme"),
+        "route53_records": row.get("route53_records")
+        or row.get("route53Records")
+        or row.get("domains")
+        or [],
+    }
+
+
+def normalize_instance(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "instance_id": _pick(row, "instance_id", "instanceId", "InstanceId", "id"),
+        "private_ip": _pick(row, "private_ip", "privateIp", "privateIP", "PrivateIpAddress"),
+        "name_tag": _pick(row, "name_tag", "nameTag", "Name", "name"),
+        "patch_class": _pick(row, "patch_class", "patchClass", "patch_class_tag"),
+        "state": _pick(row, "state", "instance_state", "instanceState"),
+        "account_id": _pick(row, "account_id", "accountId", "account"),
+        "region": _pick(row, "region", "aws_region", "awsRegion"),
+    }
+
+
+def normalize_route53(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "name": _pick(row, "name", "record_name", "recordName", "hostname"),
+        "type": _pick(row, "type", "record_type", "recordType"),
+        "route_to": _pick(row, "route_to", "routeTo", "value", "target"),
+    }
+
+
+def cmdb_api_path(prefix: str, resource: str) -> str:
+    return f"{prefix.rstrip('/')}/{resource.lstrip('/')}"
+
+
+def fetch_cmdb_albs(base_url: str, api_prefix: str) -> list[dict[str, Any]]:
+    payload = cmdb_get(base_url, cmdb_api_path(api_prefix, CMDB_PATH_ALBS))
+    return [normalize_alb(row) for row in extract_cmdb_rows(payload)]
+
+
+def fetch_cmdb_ec2(base_url: str, api_prefix: str) -> list[dict[str, Any]]:
+    payload = cmdb_get(base_url, cmdb_api_path(api_prefix, CMDB_PATH_INSTANCES))
+    return [normalize_instance(row) for row in extract_cmdb_rows(payload)]
+
+
+def fetch_cmdb_route53(base_url: str, api_prefix: str) -> list[dict[str, Any]]:
+    payload = cmdb_get(base_url, cmdb_api_path(api_prefix, CMDB_PATH_ROUTE53))
+    return [normalize_route53(row) for row in extract_cmdb_rows(payload)]
 
 
 def match_alb_in_cmdb(albs: list[dict], lb_hostname: str) -> dict[str, Any] | None:
@@ -359,8 +425,13 @@ def trace_domain(
     cmdb_url: str,
     source: str = "auto",
     region_override: str | None = None,
+    api_prefix: str = DEFAULT_CMDB_API_PREFIX,
 ) -> TraceResult:
-    result = TraceResult(domain=domain, cmdb_url=cmdb_url.rstrip("/"))
+    result = TraceResult(
+        domain=domain,
+        cmdb_url=cmdb_url.rstrip("/"),
+        cmdb_api_prefix=api_prefix.rstrip("/"),
+    )
     use_cmdb = source in ("auto", "cmdb")
 
     try:
@@ -375,8 +446,8 @@ def trace_domain(
     ec2_rows: list[dict] = []
     if use_cmdb:
         try:
-            albs = fetch_cmdb_albs(cmdb_url)
-            ec2_rows = fetch_cmdb_ec2(cmdb_url)
+            albs = fetch_cmdb_albs(cmdb_url, api_prefix)
+            ec2_rows = fetch_cmdb_ec2(cmdb_url, api_prefix)
         except requests.RequestException as exc:
             result.cmdb_available = False
             result.warnings.append(f"CMDB unreachable: {exc}")
@@ -385,7 +456,7 @@ def trace_domain(
 
     if use_cmdb and result.cmdb_available and not result.lb_hostname:
         try:
-            r53 = fetch_cmdb_route53(cmdb_url)
+            r53 = fetch_cmdb_route53(cmdb_url, api_prefix)
             lb_from_r53, r53_chain = route53_fallback_domain(r53, domain)
             result.dns_chain.extend(r53_chain)
             if lb_from_r53:
@@ -454,6 +525,8 @@ def trace_domain(
 def print_trace(result: TraceResult) -> None:
     print(f"=== Trace: {result.domain} ===")
     print(f"CMDB: {result.cmdb_url}")
+    print(f"  API: {result.cmdb_url}{result.cmdb_api_prefix}/instances")
+    print(f"       {result.cmdb_url}{result.cmdb_api_prefix}/albs")
     print(f"  UI: {result.cmdb_url}/albs-all-accounts")
     print(f"      {result.cmdb_url}/instances-all-accounts")
     print()
@@ -513,6 +586,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Trace domain to backend instance IPs")
     parser.add_argument("domain", help="Domain to trace")
     parser.add_argument(
+        "--cmdb-api-prefix",
+        default=os.environ.get("CMDB_API_PREFIX", DEFAULT_CMDB_API_PREFIX),
+        help=f"CMDB API path prefix (default: {DEFAULT_CMDB_API_PREFIX})",
+    )
+    parser.add_argument(
         "--cmdb-url",
         default="https://cmdb.paytmpayments.com",
         help="CMDB base URL",
@@ -536,6 +614,7 @@ def main() -> None:
         args.cmdb_url,
         source=args.source,
         region_override=args.region or None,
+        api_prefix=args.cmdb_api_prefix,
     )
     print_trace(result)
 

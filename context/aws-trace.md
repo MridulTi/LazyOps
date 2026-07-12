@@ -5,7 +5,7 @@
 `lazyops aws trace <domain>` is a thin CLI alias that delegates to the `aws/trace` workflow plugin. The workflow resolves **domain → load balancer → backend EC2 instance IPs** using:
 
 1. Live DNS (`nslookup`, CNAME walk)
-2. CMDB inventory APIs (`/api/alb/`, `/api/ec2/`, optional `/api/route53/`)
+2. CMDB Node API (`/node/api/albs`, `/node/api/instances`, optional `/node/api/route53`)
 3. AWS ELBv2 target health for the final hop to running instances
 
 **Status:** implemented (confirmed). CMDB auth is VPN-only, no API token (confirmed by maintainer).
@@ -20,7 +20,7 @@ Ops debugging starts with “what does this domain resolve to?” — not with a
 
 ## Why CMDB + AWS (hybrid)
 
-CMDB (`ppsl_cmdb`) syncs Route53 records, ALBs, and EC2 into separate tables/APIs. The web UI pages `albs-all-accounts` and `instances-all-accounts` are backed by `GET /api/alb/` and `GET /api/ec2/` (inferred from CMDB Django URL config in editor history — not independently verified against a live clone).
+CMDB (`ppsl_cmdb`) syncs Route53 records, ALBs, and EC2 into separate tables/APIs. Production exposes Node endpoints such as `GET https://cmdb.paytmpayments.com/node/api/instances` (confirmed). ALB and Route53 paths follow the same prefix: `/node/api/albs`, `/node/api/route53`. The web UI pages `albs-all-accounts` and `instances-all-accounts` show the same inventory.
 
 CMDB **does not** store target-group → instance membership (inferred from CMDB models: `ALB`, `EC2`, `Route53Record` with no TG model).
 

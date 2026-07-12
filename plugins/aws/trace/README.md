@@ -16,8 +16,8 @@ Equivalent: `lazyops run aws/trace <domain> [--cmdb-url ...] [--source auto|cmdb
 
 1. **nslookup** the domain and follow CNAMEs to an ELB hostname
 2. **nslookup** the ELB hostname for front-end IPs
-3. **CMDB** `/api/alb/` — match `dns_name` (same data as `/albs-all-accounts`)
-4. **CMDB** `/api/ec2/` — enrich instances (same data as `/instances-all-accounts`)
+3. **CMDB** `/node/api/albs` — match `dns_name` (same data as `/albs-all-accounts`)
+4. **CMDB** `/node/api/instances` — enrich instances (same data as `/instances-all-accounts`)
 5. **AWS ELBv2** `describe-target-health` — resolve actual backend targets
 
 ## Requirements
@@ -33,6 +33,7 @@ Default URL: `https://cmdb.paytmpayments.com`
 Override via:
 
 - `--cmdb-url`
+- `--cmdb-api-prefix` (default: `/node/api`; env: `CMDB_API_PREFIX`)
 - `LAZYOPS_CMDB_URL` env
 - `~/.lazyops/config.yaml`:
 

@@ -28,10 +28,17 @@ def aws_trace(
         "--region",
         help="AWS region override for ELBv2/EC2 calls",
     ),
+    cmdb_api_prefix: str | None = typer.Option(
+        None,
+        "--cmdb-api-prefix",
+        help="CMDB API path prefix (default: /node/api; env: CMDB_API_PREFIX)",
+    ),
 ):
     """Resolve domain → load balancer → backend instances via DNS, CMDB, and AWS."""
     resolved_cmdb = get_cmdb_url(cmdb_url)
     args = [domain, "--cmdb-url", resolved_cmdb, "--source", source]
     if region:
         args.extend(["--region", region])
+    if cmdb_api_prefix:
+        args.extend(["--cmdb-api-prefix", cmdb_api_prefix])
     run_target("aws", "trace", args)
